@@ -1,6 +1,7 @@
 //! Type definitions for the result of a compilation.
 
 use std::collections::{BTreeSet, HashMap};
+use std::env;
 use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
 
@@ -391,6 +392,10 @@ fn fill_rustc_tool_env(mut cmd: ProcessBuilder, unit: &Unit) -> ProcessBuilder {
         cmd.env("CARGO_BIN_NAME", name);
     }
     cmd.env("CARGO_CRATE_NAME", unit.target.crate_name());
+    let name = unit.target.name();
+    if let Ok(more_args) = env::var(format!("CARGO_CRATE_{name}_RUSTFLAGS")) {
+        cmd.args(&more_args.split_ascii_whitespace().collect::<Box<[_]>>());
+    }
     cmd
 }
 
